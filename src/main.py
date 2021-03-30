@@ -11,10 +11,11 @@ def get_data(date):
     req = requests.get(url, headers=headers)
 
     content = req.content
-    soup = BeautifulSoup(content)
+    soup = BeautifulSoup(content, 'html.parser')
 
-    for row in soup.find("table"):
+    for row in soup.find_all("tr"):
         print(row)
+        
     
 
 
