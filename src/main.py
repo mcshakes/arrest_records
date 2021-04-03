@@ -13,8 +13,17 @@ def get_data(date):
     content = req.content
     soup = BeautifulSoup(content, 'html.parser')
 
+    data = []
     for row in soup.find_all("tr"):
-        print(row)
+        import code; code.interact(local=dict(globals(), **locals()))
+        
+        # name = row.find("span", attrs={"class": "boldtextSmall"}).text
+
+        row_data = row.find("div", attrs={"class": "tdspace"}).text.split("\r\n")
+
+        row_data = [x.strip() for x in row_data]
+        data = [x for x in row_data if len(x.strip()) > 0]
+
         
     
 
