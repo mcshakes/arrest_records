@@ -31,27 +31,31 @@ def get_data(date: str):
     cells = []
 
     for row in soup.find_all("tr"):
-    
-        if row["class"] and row["class"][0] == 'graybkgd':     # Checks that the row is identifying data
 
-            row_data = row.find(
-                "div", attrs={"class": "tdspace"}).text.split("\r\n")
+        try:
+            # Checks that the row is identifying data
+            if row["class"] and row["class"][0] == 'graybkgd':
 
-            row_data = [x.strip() for x in row_data]
-            data = [x for x in row_data if len(x.strip()) > 0]
+                row_data = row.find(
+                    "div", attrs={"class": "tdspace"}).text.split("\r\n")
 
-            # (name, date, time, arresting_agency,
-            #  booking_number) = arrest_details(data)
-            arrest = arrest_details(data)
-            cells.append(arrest)
+                row_data = [x.strip() for x in row_data]
+                data = [x for x in row_data if len(x.strip()) > 0]
+
+                # (name, date, time, arresting_agency,
+                #  booking_number) = arrest_details(data)
+                arrest = arrest_details(data)
+                cells.append(arrest)
+        except KeyError:
+            pass
 
             # import code
             # code.interact(local=dict(globals(), **locals()))
 
-    with open('ur file.csv', 'wb') as out:
+    with open('file.csv', 'w') as out:
         csv_out = csv.writer(out)
         csv_out.writerow(['name', 'arrest_date', 'arrest_time',
-                        'arrest_agency', 'booking'])
+                          'arrest_agency', 'booking'])
         for row in cells:
             csv_out.writerow(row)
 
