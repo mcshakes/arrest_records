@@ -4,6 +4,8 @@ from datetime import datetime
 import csv
 import pandas as pd
 
+from typing import Dict, List, Tuple
+
 
 def get_soup(url: str):
     """Constructs and returns a soup using the HTML content of URL variable"""
@@ -26,18 +28,48 @@ def get_data(date: str):
 
     soup = get_soup(url)
 
-    data = []
+    cells = []
+
     for row in soup.find_all("tr"):
-        import code
-        code.interact(local=dict(globals(), **locals()))
+    
+        if row["class"] and row["class"][0] == 'graybkgd':     # Checks that the row is identifying data
 
-        # name = row.find("span", attrs={"class": "boldtextSmall"}).text
+            row_data = row.find(
+                "div", attrs={"class": "tdspace"}).text.split("\r\n")
 
-        row_data = row.find(
-            "div", attrs={"class": "tdspace"}).text.split("\r\n")
+            row_data = [x.strip() for x in row_data]
+            data = [x for x in row_data if len(x.strip()) > 0]
 
-        row_data = [x.strip() for x in row_data]
-        data = [x for x in row_data if len(x.strip()) > 0]
+            # (name, date, time, arresting_agency,
+            #  booking_number) = arrest_details(data)
+            arrest = arrest_details(data)
+            cells.append(arrest)
+
+            # import code
+            # code.interact(local=dict(globals(), **locals()))
+
+    with open('ur file.csv', 'wb') as out:
+        csv_out = csv.writer(out)
+        csv_out.writerow(['name', 'arrest_date', 'arrest_time',
+                        'arrest_agency', 'booking'])
+        for row in cells:
+            csv_out.writerow(row)
+
+
+def arrest_details(data: List[str]) -> Tuple[str, str, str, str, str]:
+
+    name = data[0].split("arrested:")[0].strip()
+    date_time = [time.strip()
+                 for time in data[0].split("arrested:")[1].split("at")]
+
+    date = date_time[0]
+    time = date_time[1]
+
+    arresting_agency = data[1].split(": ")[1]
+
+    booking_number = data[2].split(": ")[1]
+
+    return (name, date, time, arresting_agency, booking_number)
 
 
 initial_date = "02/14/06"
