@@ -31,14 +31,32 @@ def get_data(date: str):
     cells = []
 
     for row in soup.find_all("tr"):
-        import code
-        code.interact(local=dict(globals(), **locals()))
 
         arrest = ()
-        offenses = ()
+        offenses = []
+
+        # import code
+        # code.interact(local=dict(globals(), **locals()))
 
         try:
-            if row["class"] and row["class"][0] == 'graybkgd':
+            if not row.attrs:
+                print("EVER GET HERE?", row)
+
+                row_data = row.find(
+                    "div", attrs={"class": "tdspace"}).text.split("\r\n")
+
+                row_data = [x.strip() for x in row_data]
+                data = [x for x in row_data if len(x.strip()) > 0]
+
+                offense = data[0].split(": ")[1]
+                bail_amount = data[2]
+
+                offense_data = (offense, bail_amount)
+                offenses.append(offense_data)
+
+                cells.append(offenses)
+
+            if row["class"] is not None and row["class"][0] == 'graybkgd':
 
                 row_data = row.find(
                     "div", attrs={"class": "tdspace"}).text.split("\r\n")
@@ -47,22 +65,18 @@ def get_data(date: str):
                 data = [x for x in row_data if len(x.strip()) > 0]
 
                 arrest = arrest_details(data)
-                # cells.append(arrest)
-
-            else:
-
-                pass
-
-        cells.append(arrest)
+                cells.append(arrest)
 
         except KeyError:
             pass
 
     with open('file.csv', 'w') as out:
+
         csv_out = csv.writer(out)
         csv_out.writerow(['booking', 'name', 'arrest_date', 'arrest_time',
                           'arrest_agency'])
         for row in cells:
+
             csv_out.writerow(row)
 
 
