@@ -31,9 +31,13 @@ def get_data(date: str):
     cells = []
 
     for row in soup.find_all("tr"):
+        import code
+        code.interact(local=dict(globals(), **locals()))
+
+        arrest = ()
+        offenses = ()
 
         try:
-            # Checks that the row is identifying data
             if row["class"] and row["class"][0] == 'graybkgd':
 
                 row_data = row.find(
@@ -42,25 +46,29 @@ def get_data(date: str):
                 row_data = [x.strip() for x in row_data]
                 data = [x for x in row_data if len(x.strip()) > 0]
 
-                # (name, date, time, arresting_agency,
-                #  booking_number) = arrest_details(data)
                 arrest = arrest_details(data)
-                cells.append(arrest)
+                # cells.append(arrest)
+
+            else:
+
+                pass
+
+        cells.append(arrest)
+
         except KeyError:
             pass
 
-            # import code
-            # code.interact(local=dict(globals(), **locals()))
-
     with open('file.csv', 'w') as out:
         csv_out = csv.writer(out)
-        csv_out.writerow(['name', 'arrest_date', 'arrest_time',
-                          'arrest_agency', 'booking'])
+        csv_out.writerow(['booking', 'name', 'arrest_date', 'arrest_time',
+                          'arrest_agency'])
         for row in cells:
             csv_out.writerow(row)
 
 
 def arrest_details(data: List[str]) -> Tuple[str, str, str, str, str]:
+
+    booking_id = data[2].split(": ")[1]
 
     name = data[0].split("arrested:")[0].strip()
     date_time = [time.strip()
@@ -73,7 +81,7 @@ def arrest_details(data: List[str]) -> Tuple[str, str, str, str, str]:
 
     booking_number = data[2].split(": ")[1]
 
-    return (name, date, time, arresting_agency, booking_number)
+    return (booking_id, name, date, time, arresting_agency)
 
 
 initial_date = "02/14/06"
