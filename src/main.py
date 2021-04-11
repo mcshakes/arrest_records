@@ -35,13 +35,8 @@ def get_data(date: str):
         arrest = ()
         offenses = []
 
-        # import code
-        # code.interact(local=dict(globals(), **locals()))
-
         try:
             if not row.attrs:
-                print("EVER GET HERE?", row)
-
                 row_data = row.find(
                     "div", attrs={"class": "tdspace"}).text.split("\r\n")
 
@@ -71,13 +66,20 @@ def get_data(date: str):
             pass
 
     with open('file.csv', 'w') as out:
-
         csv_out = csv.writer(out)
         csv_out.writerow(['booking', 'name', 'arrest_date', 'arrest_time',
-                          'arrest_agency'])
-        for row in cells:
+                          'arrest_agency', 'offense(s)'])
 
-            csv_out.writerow(row)
+        for row in cells:
+            # import code
+            # code.interact(local=dict(globals(), **locals()))
+            new_row = row
+
+            if type(row) is list:
+                offenses = [" | ".join(x) for x in row]
+                new_row += offenses
+
+            csv_out.writerow(new_row)
 
 
 def arrest_details(data: List[str]) -> Tuple[str, str, str, str, str]:
