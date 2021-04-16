@@ -1,9 +1,10 @@
 from bs4 import BeautifulSoup
 import requests
-from datetime import datetime
 import csv
+import os
 import pandas as pd
 
+from utils.date import format_date
 from typing import Dict, List, Tuple
 
 
@@ -65,21 +66,34 @@ def get_data(date: str):
         except KeyError:
             pass
 
-    with open('file.csv', 'w') as out:
-        csv_out = csv.writer(out)
-        csv_out.writerow(['booking', 'name', 'arrest_date', 'arrest_time',
-                          'arrest_agency', 'offense(s)'])
+    write_csv(cells, date)
 
-        for row in cells:
-            # import code
-            # code.interact(local=dict(globals(), **locals()))
-            new_row = row
 
-            if type(row) is list:
-                offenses = [" | ".join(x) for x in row]
-                new_row += offenses
+def write_csv(date: str):
+    # File = open(date, "x", newline = "")
+    # print("date", date)
+    # print(os.getcwd())
+    filename = format_date(date)
+    cities = pd.DataFrame([['Sacramento', 'California'], [
+                          'Miami', 'Florida']], columns=['City', 'State'])
 
-            csv_out.writerow(new_row)
+    cities.to_csv(filename)
+    # with open("12/221/2.csv", 'w') as out:
+    # csv_out = csv.writer(out)
+    # csv_out.writerow(['booking', 'name', 'arrest_date', 'arrest_time',
+    #                   'arrest_agency', 'offence | bail'])
+
+    # for row in data:
+    #     # import code
+    #     # code.interact(local=dict(globals(), **locals()))
+    #     new_row = row
+
+    #     if type(row) is list:
+    #         offenses = [" | ".join(x) for x in row]
+    #         File = open(date, "ab")
+    #         File.write(offenses)
+
+    #     csv_out.writerow(new_row)
 
 
 def arrest_details(data: List[str]) -> Tuple[str, str, str, str, str]:
@@ -101,4 +115,5 @@ def arrest_details(data: List[str]) -> Tuple[str, str, str, str, str]:
 
 
 initial_date = "02/14/06"
-get_data(initial_date)
+# get_data(initial_date)
+write_csv(initial_date)
