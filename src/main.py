@@ -30,13 +30,16 @@ def get_data(date: str):
     soup = get_soup(url)
 
     cells = []
+    individuals = 0
 
     for row in soup.find_all("tr"):
 
         arrest = ()
-        offenses = []
 
         try:
+            # import code
+            # code.interact(local=dict(globals(), **locals()))
+
             if not row.attrs:
                 row_data = row.find(
                     "div", attrs={"class": "tdspace"}).text.split("\r\n")
@@ -48,9 +51,9 @@ def get_data(date: str):
                 bail_amount = data[2]
 
                 offense_data = (offense, bail_amount)
-                offenses.append(offense_data)
+                offense_data = offense_data
 
-                cells.append(offenses)
+                cells[individuals - 1]["offenses"].append(offense_data)
 
             if row["class"] is not None and row["class"][0] == 'graybkgd':
 
@@ -62,21 +65,22 @@ def get_data(date: str):
 
                 arrest = arrest_details(data)
                 cells.append(arrest)
+                individuals += 1
 
         except KeyError:
             pass
 
-    write_csv(cells, date)
+    # write_csv(cells, date)
+    print(cells)
 
 
-def write_csv(date: str):
+def write_csv(data, date: str):
     # File = open(date, "x", newline = "")
     # print("date", date)
     # print(os.getcwd())
     filename = format_date(date)
-    cities = pd.DataFrame([['Sacramento', 'California'], [
-                          'Miami', 'Florida']], columns=['City', 'State'])
 
+    pd.DataFrame(data)
     cities.to_csv(filename)
     # with open("12/221/2.csv", 'w') as out:
     # csv_out = csv.writer(out)
@@ -84,8 +88,7 @@ def write_csv(date: str):
     #                   'arrest_agency', 'offence | bail'])
 
     # for row in data:
-    #     # import code
-    #     # code.interact(local=dict(globals(), **locals()))
+
     #     new_row = row
 
     #     if type(row) is list:
@@ -100,20 +103,20 @@ def arrest_details(data: List[str]) -> Tuple[str, str, str, str, str]:
 
     booking_id = data[2].split(": ")[1]
 
-    name = data[0].split("arrested:")[0].strip()
+    arrested = data[0].split("arrested:")[0].strip()
     date_time = [time.strip()
                  for time in data[0].split("arrested:")[1].split("at")]
 
-    date = date_time[0]
-    time = date_time[1]
+    a_date = date_time[0]
+    a_time = date_time[1]
 
     arresting_agency = data[1].split(": ")[1]
 
     booking_number = data[2].split(": ")[1]
 
-    return (booking_id, name, date, time, arresting_agency)
+    # return [booking_id, name, date, time, arresting_agency]
+    return {"booking_id": booking_id, "name": arrested, "date": a_date, "time": a_time, "agency": arresting_agency, "offenses": []}
 
 
 initial_date = "02/14/06"
-# get_data(initial_date)
-write_csv(initial_date)
+get_data(initial_date)
