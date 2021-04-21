@@ -1,15 +1,15 @@
+from typing import Dict, List, Tuple
+from utils.date import format_date
+from utils.chromedriver import configure_chrome_driver
 from bs4 import BeautifulSoup
 import requests
 import csv
 import os
 import pandas as pd
-
-from utils.date import format_date
-from typing import Dict, List, Tuple
+import time
 
 
 def get_soup(url: str):
-    """Constructs and returns a soup using the HTML content of URL variable"""
 
     USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'
     LANGUAGE = "en-US,en;q=0.5"
@@ -19,30 +19,42 @@ def get_soup(url: str):
     session.headers['Accept-Language'] = LANGUAGE
     session.headers['Content-Language'] = LANGUAGE
 
-    html = requests.get(url)
+    html = requests.get(url, allow_redirects=False)
+    # import code
+    # code.interact(local=dict(globals(), **locals()))
+
+    print("THE RESPONSE URL", html.url)
     content = html.content
+    print("THE RESPONSE CONTENT", html.content)
     return BeautifulSoup(content, 'html.parser')
+
+    # driver.get(url)
+    # WebDriverWait(driver, 3).until(
+    #     lambda s: s.find_element_by_id("arrestedtable").is_displayed()
+    # )
+
+    # return BeautifulSoup(driver.page_source, 'html.parser')
 
 
 def get_data(date: str):
     url = f"https://www.weldsheriff.com/apps1/dailyArrests/index.cfm?date_booked={date}"
 
+    # webdriver = configure_chrome_driver()
+
+    # soup = get_soup(webdriver, url)
     soup = get_soup(url)
 
     cells = []
     individuals = 0
 
     for row in soup.find_all("tr"):
-
         arrest = ()
 
         try:
-            # import code
-            # code.interact(local=dict(globals(), **locals()))
-
             if not row.attrs:
+
                 row_data = row.find(
-                    "div", attrs={"class": "tdspace"}).text.split("\r\n")
+                    "div", attrs={"class": "tdspace"}).text.split("\n")
 
                 row_data = [x.strip() for x in row_data]
                 data = [x for x in row_data if len(x.strip()) > 0]
@@ -58,45 +70,29 @@ def get_data(date: str):
             if row["class"] is not None and row["class"][0] == 'graybkgd':
 
                 row_data = row.find(
-                    "div", attrs={"class": "tdspace"}).text.split("\r\n")
+                    "div", attrs={"class": "tdspace"}).text.split("\n")
 
                 row_data = [x.strip() for x in row_data]
                 data = [x for x in row_data if len(x.strip()) > 0]
 
                 arrest = arrest_details(data)
+
                 cells.append(arrest)
                 individuals += 1
 
         except KeyError:
             pass
 
-    # write_csv(cells, date)
-    print(cells)
+    write_csv(cells, date)
 
 
 def write_csv(data, date: str):
-    # File = open(date, "x", newline = "")
-    # print("date", date)
-    # print(os.getcwd())
+
     filename = format_date(date)
 
-    pd.DataFrame(data)
-    cities.to_csv(filename)
-    # with open("12/221/2.csv", 'w') as out:
-    # csv_out = csv.writer(out)
-    # csv_out.writerow(['booking', 'name', 'arrest_date', 'arrest_time',
-    #                   'arrest_agency', 'offence | bail'])
-
-    # for row in data:
-
-    #     new_row = row
-
-    #     if type(row) is list:
-    #         offenses = [" | ".join(x) for x in row]
-    #         File = open(date, "ab")
-    #         File.write(offenses)
-
-    #     csv_out.writerow(new_row)
+    arrests = pd.DataFrame(data, columns=('booking', 'name', 'arrest_date', 'arrest_time',
+                                          'arrest_agency', 'offence | bail'))
+    arrests.to_csv(filename)
 
 
 def arrest_details(data: List[str]) -> Tuple[str, str, str, str, str]:
