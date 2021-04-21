@@ -19,13 +19,9 @@ def get_soup(url: str):
     session.headers['Accept-Language'] = LANGUAGE
     session.headers['Content-Language'] = LANGUAGE
 
-    html = requests.get(url, allow_redirects=False)
-    # import code
-    # code.interact(local=dict(globals(), **locals()))
+    html = requests.get(url)
 
-    print("THE RESPONSE URL", html.url)
     content = html.content
-    print("THE RESPONSE CONTENT", html.content)
     return BeautifulSoup(content, 'html.parser')
 
     # driver.get(url)
@@ -87,11 +83,13 @@ def get_data(date: str):
 
 
 def write_csv(data, date: str):
-
+    # import code
+    # code.interact(local=dict(globals(), **locals()))
     filename = format_date(date)
 
-    arrests = pd.DataFrame(data, columns=('booking', 'name', 'arrest_date', 'arrest_time',
-                                          'arrest_agency', 'offence | bail'))
+    # arrests = pd.DataFrame(data, columns=('booking', 'name', 'arrest_date', 'arrest_time',
+    #                                       'arrest_agency', 'offences | bail'))
+    arrests = pd.DataFrame.from_dict(data)
     arrests.to_csv(filename)
 
 
@@ -110,7 +108,6 @@ def arrest_details(data: List[str]) -> Tuple[str, str, str, str, str]:
 
     booking_number = data[2].split(": ")[1]
 
-    # return [booking_id, name, date, time, arresting_agency]
     return {"booking_id": booking_id, "name": arrested, "date": a_date, "time": a_time, "agency": arresting_agency, "offenses": []}
 
 
