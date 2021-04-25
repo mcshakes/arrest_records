@@ -9,7 +9,16 @@ import pandas as pd
 import time
 
 
-def get_soup(url: str):
+def select_date(driver, date: str):
+    driver.get(url)
+    WebDriverWait(driver, 3).until(
+        lambda s: s.find_element_by_id("arrestedtable").is_displayed()
+    )
+
+    return BeautifulSoup(driver.page_source, 'html.parser')
+
+
+def get_soup(driver, url: str):
 
     USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'
     LANGUAGE = "en-US,en;q=0.5"
@@ -21,24 +30,20 @@ def get_soup(url: str):
 
     html = requests.get(url)
 
-    content = html.content
-    return BeautifulSoup(content, 'html.parser')
-
-    # driver.get(url)
-    # WebDriverWait(driver, 3).until(
-    #     lambda s: s.find_element_by_id("arrestedtable").is_displayed()
-    # )
-
-    # return BeautifulSoup(driver.page_source, 'html.parser')
+    # content = html.content
+    # return BeautifulSoup(content, 'html.parser')
 
 
 def get_data(date: str):
     url = f"https://www.weldsheriff.com/apps1/dailyArrests/index.cfm?date_booked={date}"
 
-    # webdriver = configure_chrome_driver()
+    webdriver = configure_chrome_driver()
 
-    # soup = get_soup(webdriver, url)
-    soup = get_soup(url)
+    select_date(webdriver, date)
+
+    soup = get_soup(webdriver, url)
+
+    # soup = get_soup(url)
 
     cells = []
     individuals = 0
@@ -83,8 +88,7 @@ def get_data(date: str):
 
 
 def write_csv(data, date: str):
-    # import code
-    # code.interact(local=dict(globals(), **locals()))
+
     filename = format_date(date)
 
     # arrests = pd.DataFrame(data, columns=('booking', 'name', 'arrest_date', 'arrest_time',
@@ -113,3 +117,10 @@ def arrest_details(data: List[str]) -> Tuple[str, str, str, str, str]:
 
 initial_date = "02/14/06"
 get_data(initial_date)
+
+# Show up at site
+#start date loop
+# Enter date in thing
+# click search
+# send site data to soup
+# scrape and save

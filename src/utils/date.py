@@ -8,7 +8,7 @@ def output_date():
         start + datetime.timedelta(days=x) for x in range(0, (end-start).days)]
 
     for date in date_generated:
-        print(date.strftime("%m/%d/%Y"))
+        return date.strftime("%m/%d/%Y")
 
 
 def format_date(date: str):
